@@ -16,4 +16,4 @@ ncmdump-gui 基于 [ncmdump-go](https://git.taurusxin.com/taurusxin/ncmdump-go) 
 
 ## Bug 及建议
 
-如有任何问题或建议，请直接通过 [Issue](https://git.taurusxin.com/taurusxin/ncmdump-gui/issues) 反馈，本站已开放注册。
+如有任何问题或建议，请通过 ncmdump GitHub [Issue](https://github.com/taurusxin/ncmdump/issues) 反馈，本站由于反注册机制已关闭注册。
