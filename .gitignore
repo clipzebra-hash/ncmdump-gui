@@ -5,3 +5,19 @@ frontend/dist
 frontend/wailsjs/
 
 frontend/package.json.md5
+# Local data, credentials and build artifacts
+.DS_Store
+.idea/
+*.ncm
+*.mp3
+*.flac
+*.wav
+*.log
+*.jsonl
+.env
+.env.*
+*.pem
+*.key
+coverage*
+*.app/
+*.dmg

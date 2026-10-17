@@ -45,4 +45,4 @@ require (
 	golang.org/x/text v0.31.0 // indirect
 )
 
-// replace github.com/wailsapp/wails/v2 v2.9.2 => /Users/taurusxin/Workspace/gopath/pkg/mod
+replace git.taurusxin.com/taurusxin/ncmdump-go => ./third_party/ncmdump-go

@@ -25,7 +25,7 @@ func main() {
 
 	// Create application with options
 	err = wails.Run(&options.App{
-		Title:  "ncmdump-gui",
+		Title:  "ncmdump-gui · 离线优化版 · SMB修复",
 		Width:  750,
 		Height: 500,
 		AssetServer: &assetserver.Options{

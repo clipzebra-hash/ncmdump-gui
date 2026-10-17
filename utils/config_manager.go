@@ -14,8 +14,9 @@ const (
 )
 
 type Preference struct {
-	SaveTo SaveToType  `json:"save_to"`
-	Path   string       `json:"path"`
+	DeleteSource bool       `json:"delete_source"`
+	SaveTo       SaveToType `json:"save_to"`
+	Path         string     `json:"path"`
 }
 
 type ConfigManager struct {
