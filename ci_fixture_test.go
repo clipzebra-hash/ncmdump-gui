@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/aes"
 	"encoding/binary"
 	"os"
@@ -63,4 +64,29 @@ func syntheticFixture(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return p
+}
+
+// Check decrypted bytes independently so fixture errors cannot make CI vacuous.
+func TestSyntheticFixtureRoundTrip(t *testing.T) {
+	source := syntheticFixture(t)
+	dir := t.TempDir()
+	if _, err := convertFile(context.Background(), source, dir); err != nil {
+		t.Fatal(err)
+	}
+	files, err := os.ReadDir(dir)
+	if err != nil || len(files) != 1 {
+		t.Fatalf("outputs: %v, %v", files, err)
+	}
+	got, err := os.ReadFile(filepath.Join(dir, files[0].Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := make([]byte, 600003)
+	copy(want, []byte{'I', 'D', '3', 3, 0, 0, 0, 0, 0, 0})
+	for i := 10; i < len(want); i++ {
+		want[i] = byte(i * 7)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatal("decrypted synthetic payload differs")
+	}
 }

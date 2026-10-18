@@ -16,12 +16,12 @@ Actions 是 GitHub 的自动化功能；Workflow 是 `.github/workflows/ci.yml` 
 
 ## 平台与验证边界
 
-明确选择 macos-15-intel，不使用可能指向 ARM 的 macos-latest。runner 自带 Xcode/clang 和 macOS SDK，Wails 使用系统 WebKit，不需要 Linux 的 GTK/WebKitGTK。构建设置 MACOSX_DEPLOYMENT_TARGET=13.0，并检查实际 Mach-O 的 x86_64 架构、minos 与 plist 最低版本。最后做本地临时签名和签名完整性检查；没有 Apple Developer ID 签名或公证，下载后可能被 Gatekeeper 阻止。不要把编译成功当成 Ventura 13.7.8 实机验收。
+明确选择 macos-15-intel，不使用可能指向 ARM 的 macos-latest。runner 自带 Xcode/clang 和 macOS SDK，Wails 使用系统 WebKit，不需要 Linux 的 GTK/WebKitGTK。Wails 2.11.0 默认另加 10.13 的编译参数，因此同时显式设置 CGO_CFLAGS / CGO_CXXFLAGS / CGO_LDFLAGS 的 -mmacosx-version-min=13.0 与 MACOSX_DEPLOYMENT_TARGET=13.0，并检查实际 Mach-O 的 x86_64 架构、minos 与 plist 最低版本。最后做本地临时签名和签名完整性检查；没有 Apple Developer ID 签名或公证，下载后可能被 Gatekeeper 阻止。不要把编译成功当成 Ventura 13.7.8 实机验收。
 
 CI 自动使用确定性人工 NCM 样本，测试转换、队列、取消、输出碰撞保护与测试临时废纸篓；仍可设置 NCM_TEST_FILE 使用外部样本。真实音乐批量回归与 SMB 测试需要专用环境，默认会显示 SKIP。CI 不接触真实用户废纸篓。不将人工样本称为真实音乐兼容性证明。Windows/Linux 的废纸篓语义尚未验证，因此暂不提供这些应用附件。
 
 ## 成本与回退
 
-本仓库为公开仓库。GitHub 官方说明标准托管 runner 在公开仓库免费；附件存储与账户配额、保留策略仍应在 Settings → Billing and licensing / Actions 中核对。这里仅使用标准 runner，保留期 14 天；没有启用付费大规格 runner，也未更改账单设置。私有仓库、收费规则变化或额外存储可能影响费用。参考：https://docs.github.com/en/billing/concepts/product-billing/github-actions
+本仓库为公开仓库。GitHub 官方说明标准托管 runner 在公开仓库免费；GitHub Free 的附件额度为 500 MB（与 Packages 共用），缓存为每仓库 10 GB；实际账户套餐未核实。附件存储与账户配额、保留策略仍应在 Settings → Billing and licensing / Actions 中核对。这里仅使用标准 runner，保留期 14 天；没有启用付费大规格 runner，也未更改账单设置。私有仓库、收费规则变化或额外存储可能影响费用。参考：https://docs.github.com/en/billing/concepts/product-billing/github-actions
 
 在合并前可以直接放弃 CI 分支；合并后可在 Actions 中 Disable workflow 暂停，或通过新提交撤销本次 CI 改动。不要强推改写已有历史。下载 CI 应用不会自动替换本机应用；人工试用前保留旧应用，输出到独立目录，删除源文件选项保持关闭。正式标签发布须先人工检查成功日志、许可证、Ventura 实机行为和附件，再由用户单独确认发布内容。

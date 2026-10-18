@@ -26,6 +26,9 @@ jobs:
       GOFLAGS: -mod=readonly
       MACOSX_DEPLOYMENT_TARGET: '13.0'
       CGO_ENABLED: '1'
+      CGO_CFLAGS: '-mmacosx-version-min=13.0'
+      CGO_CXXFLAGS: '-mmacosx-version-min=13.0'
+      CGO_LDFLAGS: '-mmacosx-version-min=13.0'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
