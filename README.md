@@ -9,3 +9,7 @@
 第三方转换库来自 ncmdump-go v1.7.5，保存在 third_party/ncmdump-go，保留其 MIT 许可证；字体许可证见 frontend/src/assets/fonts/OFL.txt。
 
 上游当前要求在 [taurusxin/ncmdump 的 GitHub Issues](https://github.com/taurusxin/ncmdump/issues) 反馈 GUI 问题。这里的 Go/Wails GUI 与该 C++ 仓库代码不同，不能直接跨仓库提交可合并的 PR。
+
+## 自动构建检查
+
+Intel Mac CI 的触发、附件下载、测试边界与回退方法见 [CI 使用说明](docs/CI.md)。CI 附件是供验收的社区构建，不是正式 Release。

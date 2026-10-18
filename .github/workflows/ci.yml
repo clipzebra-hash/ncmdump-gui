@@ -1,0 +1,106 @@
+name: CI - macOS Intel
+
+on:
+  push:
+    branches: [main, 'ci/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos-intel:
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash --noprofile --norc -euo pipefail {0}
+    env:
+      CI: 'true'
+      GOTOOLCHAIN: local
+      GOFLAGS: -mod=readonly
+      MACOSX_DEPLOYMENT_TARGET: '13.0'
+      CGO_ENABLED: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: '1.24.13'
+          check-latest: false
+          cache: true
+          cache-dependency-path: |
+            go.sum
+            third_party/ncmdump-go/go.sum
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24.19.0'
+          check-latest: false
+      - name: Record environment and install pinned tools
+        run: |
+          mkdir -p ci-logs
+          {
+            test "$(uname -m)" = x86_64
+            sw_vers
+            xcodebuild -version
+            xcrun --find clang
+            clang --version
+            go version
+            node --version
+            git rev-parse HEAD
+            npm install --global pnpm@9.15.9
+            pnpm --version
+            go install github.com/wailsapp/wails/v2/cmd/wails@v2.11.0
+          } 2>&1 | tee ci-logs/environment.log
+      - name: Verify dependencies and generate Wails bindings
+        run: |
+          {
+            go mod download
+            go mod verify
+            (cd third_party/ncmdump-go && go mod download && go mod verify)
+            mkdir -p frontend/dist
+            touch frontend/dist/.placeholder
+            "$(go env GOPATH)/bin/wails" doctor
+            "$(go env GOPATH)/bin/wails" generate module
+          } 2>&1 | tee ci-logs/dependencies.log
+      - name: Frontend type check and production build
+        run: |
+          {
+            cd frontend
+            pnpm install --frozen-lockfile --ignore-scripts
+            node node_modules/esbuild/install.js
+            pnpm build
+          } 2>&1 | tee ci-logs/frontend.log
+      - name: Go tests with race detection
+        run: |
+          go test -race -count=1 -v ./... 2>&1 | tee ci-logs/go-tests.log
+          (cd third_party/ncmdump-go && go test -race -count=1 -v ./...) 2>&1 | tee ci-logs/library-tests.log
+      - name: Build and inspect Intel application
+        run: |
+          {
+            "$(go env GOPATH)/bin/wails" build -s -m -platform darwin/amd64 -trimpath
+            bash scripts/ci/package-macos.sh
+            git diff --exit-code -- go.mod go.sum third_party/ncmdump-go/go.mod third_party/ncmdump-go/go.sum frontend/pnpm-lock.yaml
+          } 2>&1 | tee ci-logs/build.log
+      - name: Upload application only after all checks pass
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ncmdump-gui-macos-intel-${{ github.sha }}
+          path: ci-package/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Keep diagnostic logs even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-logs-macos-intel-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-logs/
+          if-no-files-found: warn
+          retention-days: 14

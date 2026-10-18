@@ -15,7 +15,7 @@ func fixture(t *testing.T) string {
 	t.Helper()
 	p := os.Getenv("NCM_TEST_FILE")
 	if p == "" {
-		t.Skip("NCM_TEST_FILE required")
+		return syntheticFixture(t)
 	}
 	return p
 }
