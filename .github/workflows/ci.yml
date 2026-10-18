@@ -74,7 +74,7 @@ jobs:
           {
             cd frontend
             pnpm install --frozen-lockfile --ignore-scripts
-            node node_modules/esbuild/install.js
+            node -e "require(require.resolve('esbuild/install.js', {paths: [require.resolve('vite')]}))"
             pnpm build
           } 2>&1 | tee ci-logs/frontend.log
       - name: Go tests with race detection
